@@ -1,64 +1,65 @@
 <template>
     <div>
-         <svg></svg>
-         <div class="tooltip"></div>
-     </div>
- </template>
- 
- <script setup lang="ts">
- import * as d3 from 'd3';
- import { onMounted  } from 'vue';
- import { data, column, colors } from '@/data/groupBar'
- import type { IGroupBar } from '@/data/groupBar'
- 
- onMounted(() => {
-     draw()
- })
- 
- function draw(){
-     const svg = d3.select("svg");
-     svg.selectAll("*").remove();
- 
-     const width = 800;
-     const height = 400;
-     const margin = { top: 40, right: 40, bottom: 30, left: 40 };
- 
-     svg.attr("width", width)
-     .attr("height", height)
-     .attr("font-size", 10)
-     .style("overflow", "visible")
- 
-    //  const tooltip = d3.select('.tooltip');
- 
+        <svg></svg>
+        <div class="tooltip"></div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import * as d3 from 'd3';
+import { onMounted  } from 'vue';
+import { data, column, colors } from '@/data/groupBar'
+import type { IGroupBar } from '@/data/groupBar'
+
+onMounted(() => {
+    draw()
+})
+
+function draw(){
+    const svg = d3.select("svg");
+    svg.selectAll("*").remove();
+
+    const width = 800;
+    const height = 400;
+    const margin = { top: 40, right: 40, bottom: 30, left: 40 };
+
+    svg.attr("width", width)
+    .attr("height", height)
+    .attr("font-size", 10)
+    .style("overflow", "visible")
+    .call(responsivefy)
+
+    const tooltip = d3.select('.tooltip')
+        .style('display', 'none')
+
     const max = d3.max(data, d => {
     const values = Object.values(d).slice(1);
         return d3.max(values);
     })!;
     const maxValue = max + (10 - (max % 10));
- 
+
     const xScale = d3.scaleBand()
         .domain(data.map(d => d.name))
         .range([0, width])
-        .padding(0.5);
-    
+        .padding(0.5)
+
     const yScale = d3.scaleLinear()
         .domain([0, maxValue])
         .range([height, 0]);
- 
+
     const xAxis = d3.axisBottom(xScale)
-         .tickSize(0)
-         .tickPadding(8);
-     
+            .tickSize(0)
+            .tickPadding(8);
+        
     const yAxis = d3.axisLeft(yScale)
-         .ticks(9)
-         .tickSize(0)
-         .tickPadding(6)
- 
-     // Add x-axis
+            .tickSize(0)
+            .tickPadding(6)
+
+        // Add x-axis
     svg.append('g')
-         .attr("transform", `translate(0,${height})`)
-         .call(xAxis);
- 
+            .attr("transform", `translate(0,${height})`)
+            .call(xAxis);
+
     svg.append('g')
         .call(yAxis)
         .call(g => g.selectAll(".tick line")
@@ -98,15 +99,38 @@
         .attr("width", xSubgroup.bandwidth())
         .attr("height", d => height - yScale(d.value as number))
         .attr("fill", d => color(d.key) as string)
- }
- </script>
- <style>
-     .tooltip {
-         position: absolute; 
-         background-color:#FFFFFF;
-         padding: 10px;
-         box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
-         border-radius: 8px;
-     }
- 
- </style>
+
+
+    function responsivefy(svg: any) {
+        const container = d3.select(svg.node().parentNode),
+            width = parseInt(svg.style('width'), 10),
+            height = parseInt(svg.style('height'), 10),
+            aspect = width / height;
+
+        svg.attr('viewBox', `0 0 ${width} ${height}`)
+            .attr('preserveAspectRatio', 'xMinYMid')
+            .call(resize);
+        
+
+        d3.select(window).on(
+            'resize.' + container.attr('id'), 
+            resize
+        );
+        
+        function resize() {
+            const w = parseInt(container.style('width'));
+            svg.attr('width', w);
+            svg.attr('height', Math.round(w / aspect));
+        }
+    }
+}
+</script>
+<style>
+    .tooltip {
+        position: absolute; 
+        background-color:#FFFFFF;
+        padding: 10px;
+        box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
+        border-radius: 8px;
+    }
+</style>

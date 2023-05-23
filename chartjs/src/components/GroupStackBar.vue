@@ -7,12 +7,12 @@ import { Chart as ChartJS, registerables } from 'chart.js';
 import { ref, onMounted } from 'vue';
 import { data, label } from '@/data/groupstackbar' 
 
-  ChartJS.register(...registerables);
-  const groupStack = ref<HTMLCanvasElement | null>(null);
-  
-  onMounted(() => {
-   renderChart();
-  });
+ChartJS.register(...registerables);
+const groupStack = ref<HTMLCanvasElement | null>(null);
+
+onMounted(() => {
+  renderChart();
+});
   
   function renderChart(){
     if (groupStack.value) {
@@ -53,8 +53,8 @@ import { data, label } from '@/data/groupstackbar'
     }
   }
   
-  </script>
-  <style>
-  
-  </style>
+</script>
+<style>
+
+</style>
      

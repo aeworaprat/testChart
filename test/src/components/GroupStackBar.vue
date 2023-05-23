@@ -1,123 +1,109 @@
 <template>
     <div>
-         <svg></svg>
-         <div class="tooltip"></div>
-     </div>
- </template>
- 
- <script setup lang="ts">
- import * as d3 from 'd3';
- import { onMounted  } from 'vue';
- import { data, column, colors } from '@/data/groupBar'
- import type { IGroupBar } from '@/data/groupBar'
- 
- onMounted(() => {
-     draw()
- })
- 
- function draw(){
-    const data = [
-	  {
-	    Category: "cat1",
-	    type1: 300,
-	    type2: 450,
-	    type3: 120
-	  },
-	  {
-	    Category: "cat2",
-	    type1: 400,
-	    type2: 100,
-	    type3: 200
-	  },
-	  {
-	    Category: "cat3",
-	    type1: 400,
-	    type2: 100,
-	    type3: 200
-	  },
-	  {
-	    Category: "cat4",
-	    type1: 400,
-	    type2: 100,
-	    type3: 200
-	  }
-	];
+		<svg></svg>
+		<div class="tooltip"></div>
+	</div>
+</template>
 
-	const width = 500 
-    const height = 500
-    const padding = 40;
+<script setup lang="ts">
+import * as d3 from 'd3';
+import { onMounted  } from 'vue';
+import { data, colors } from '@/data/groupstackbar'
+import type { IGroupBar } from '@/data/groupBar'
+
+onMounted(() => {
+	draw()
+})
+
+function draw(){
+
+	const width = 800 
+    const height = 400
+
 	const svg = d3.select('svg')
         .attr('width', width)
-        .attr('height', height);
-
-	const stack = d3.stack()
-        .keys(['type1','type2','type3']);
+        .attr('height', height)
+		.style("overflow", "visible")
+		.style("overflow", "visible")
 	
-	const datasets=[
-        d3.stack().keys(['type1','type3'])(data as any),		  
-        d3.stack().keys(['type2'])(data as any)
+	const datasets = [
+        d3.stack().keys(['task_call_in','task_call_out','follow','email', 'meeting', 'support'])(data as any),		  
+        d3.stack().keys(['call_call_in', 'call_call_out'])(data as any)
     ];
 
-	const num_groups = datasets.length;
-
-	const xlabels = data.map(function(d){return d['Category']});
+	const xlabels = data.map(function(d){return d['name']});
 
 	const xScale = d3.scaleBand()
         .domain(xlabels)
         .range([0,width])
         .padding(0.5);
-
-	const ydomain_min = d3.min(datasets.flat().map(function(row) {
-        return d3.min(row.map(function(d){return d[1];}))!;
-    }));
     
-
-	const ydomain_max = d3.max(datasets.flat().map(function(row) {
+	const maxValue = d3.max(datasets.flat().map(function(row) {
         return d3.max(row.map(function(d){return d[1];}))!;
     }));
 
-    const yscale = d3.scaleLinear()
-        .domain([0,ydomain_max!])
-        .range([height-padding,padding]);
+    const yScale = d3.scaleLinear()
+        .domain([0, maxValue!])
+        .range([height, 0]);
 
-    const accent = d3.scaleOrdinal(d3.schemeBlues[6]);
-	const xaxis = d3.axisBottom(xScale);
-	const yaxis = d3.axisLeft(yscale);
+    const color = d3.scaleOrdinal(colors);
 
-	d3.range(num_groups).forEach(function(gnum) {
-		svg.selectAll('g.group'+gnum)
-			.data(datasets[gnum])
+	const xAxis = d3.axisBottom(xScale)
+		.tickSize(0)
+        .tickPadding(8)
+
+	const yAxis = d3.axisLeft(yScale)
+        .tickSize(0)
+        .tickPadding(6)
+
+	svg.append('g')
+		.attr('class','axis x')
+		.attr('transform','translate(0,'+(height)+")")
+		.call(xAxis);
+
+	svg.append('g')
+		.call(yAxis)
+		.call(g => g.selectAll(".tick line")
+			.attr("stroke", "#A0ABBA").clone()
+			.attr("x2", width)
+			.attr("stroke-opacity",   0.3))
+		.call(g => g.select(".domain").remove())
+		.call(g => g.append("text")
+			.attr('transform', 'rotate(-90)')
+			.attr('x', -(height / 2))
+			.attr('y', -50) // Relative to the y axis.
+			.attr("fill", "currentColor")
+			.attr("text-anchor", "start")
+			.text('ssss'))
+
+	d3.range(datasets.length).forEach(function(num) {
+		svg.selectAll('g.group'+num)
+			.data(datasets[num])
 			.enter()
 			.append('g')
-				.attr('fill', accent as any)
-				.attr('class', 'group' + gnum)
+				.attr('fill', color as any)
+				.attr('class', 'group' + num)
 			.selectAll('rect')
-			.data(d=>d)
+			.data(d => d)
 			.enter()
 			.append('rect')
-				.attr('x',(d,i)=> xScale(xlabels[i])! + (xScale.bandwidth()/num_groups) * gnum)
-				.attr('y',d=>yscale(d[1]))
-				.attr('width',xScale.bandwidth() / num_groups)
-				.attr('height',d=>yscale(d[0])-yscale(d[1]));
+				.attr('x',(d,i)=> xScale(xlabels[i])! + (xScale.bandwidth()/datasets.length) * num)
+				.attr('y',d=>yScale(d[1]))
+				// .attr('width', xScale.bandwidth() / datasets.length)
+				.attr('width', 40)
+				.attr('height',d=>yScale(d[0])-yScale(d[1]))
+				.attr('stroke', '#FFFFFF')
+        		.attr('stroke-width', 1)
 			});
+}
+</script>
+<style>
+	.tooltip {
+		position: absolute; 
+		background-color:#FFFFFF;
+		padding: 10px;
+		box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
+		border-radius: 8px;
+	}
 
-	svg.append('g')
-			.attr('class','axis x')
-			.attr('transform','translate(0,'+(height-padding)+")")
-		.call(xaxis);
-	svg.append('g')
-			.attr('class','axis y')
-			.attr('transform','translate('+padding+",0)")
-		.call(yaxis);
- }
- </script>
- <style>
-     .tooltip {
-         position: absolute; 
-         background-color:#FFFFFF;
-         padding: 10px;
-         box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
-         border-radius: 8px;
-     }
- 
- </style>
+</style>
