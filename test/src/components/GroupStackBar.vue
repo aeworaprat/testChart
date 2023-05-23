@@ -97,7 +97,7 @@
 			.append('rect')
 				.attr('x',(d,i)=> xScale(xlabels[i])! + (xScale.bandwidth()/num_groups) * gnum)
 				.attr('y',d=>yscale(d[1]))
-				.attr('width',xScale.bandwidth()/num_groups)
+				.attr('width',xScale.bandwidth() / num_groups)
 				.attr('height',d=>yscale(d[0])-yscale(d[1]));
 			});
 
@@ -119,4 +119,5 @@
          box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
          border-radius: 8px;
      }
+ 
  </style>

@@ -28,6 +28,11 @@ const router = createRouter({
       path: '/groupbar',
       name: 'groupbar',
     component: () => import('../views/GroupBarView.vue')
+    },
+    {
+      path: '/groupstackbar',
+      name: 'groupstackbar',
+    component: () => import('../views/GroupStackBarView.vue')
     }
   ]
 })

@@ -5,6 +5,7 @@
         <RouterLink to="/multiline">multiline</RouterLink>
         <RouterLink to="/stackbar">stackbar</RouterLink>
         <RouterLink to="/groupbar">groupbar</RouterLink>
+        <RouterLink to="/groupstackbar">groupstackbar</RouterLink>
       </nav>
 
   <RouterView />
