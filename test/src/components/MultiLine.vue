@@ -158,8 +158,6 @@ function draw(){
                 .attr('r', 9)
                 .style('fill', d => d.color)
                 .attr('opacity',0.3)
-                // .attr("stroke", "black")
-                // .attr("stroke-width", "2px")
 
             tooltipCircle.style('display', 'block')
                 .attr('cx', xScale(label.value[i])!)

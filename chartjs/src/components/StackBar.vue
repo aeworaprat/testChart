@@ -42,8 +42,8 @@ function renderChart(){
             beginAtZero: true,
           },
          },
-         plugins: {
-           tooltip: {
+          plugins: {
+            tooltip: {
               backgroundColor: '#FFFFFF',
               padding: 10,
               borderWidth: 1,
@@ -52,6 +52,15 @@ function renderChart(){
               titleColor: 'black',
               bodyColor: 'black',
               footerColor: 'black',
+              usePointStyle: true,
+              callbacks: {
+                labelPointStyle: () => {
+                  return {
+                    pointStyle: 'circle',
+                    rotation: 0,
+                  };
+                },
+              }
            }
          }
        }

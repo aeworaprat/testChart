@@ -5,7 +5,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { ILine } from "@/data/interface";
+import type { ILine } from "@/data/line";
 import Line from '../components/Line.vue'
 
 //data 1
