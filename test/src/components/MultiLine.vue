@@ -42,7 +42,6 @@ function draw(){
     const svg = d3.select("svg");
     svg.selectAll("*").remove();
 
-    // Define margins, dimensions, and some line colors
     const width = 800;
     const height = 400;
     const margin = {top: 40, right: 40, bottom: 30, left: 40};
@@ -53,7 +52,7 @@ function draw(){
         .style("overflow", "visible")
         .on('pointerenter mousemove', pointermoved)
         .on('mouseout', pointerleft)
-        .call(responsivefy); // tada!;
+        .call(responsivefy);
 
     const tooltip = d3.select('.tooltip');
     const tooltipLine = svg.append('line');
@@ -125,12 +124,10 @@ function draw(){
         .append('circle')
         .attr('class', 'circle')
 
-
-
     function pointermoved(event: MouseEvent) {
         const [index] = d3.pointer(event)
         const i = Math.round((index - margin.left) / xScale.step());
-        if(i != -1 && i < label.value.length){
+        if(i >= 0 && i < label.value.length){
             const xTitle = label.value[i]
             tooltip.style('display', 'block')
                 .style('left', `${event.pageX + 20}px`)

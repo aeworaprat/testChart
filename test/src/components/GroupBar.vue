@@ -27,6 +27,8 @@ function draw(){
     .attr("height", height)
     .attr("font-size", 10)
     .style("overflow", "visible")
+    .on('mousemove', pointermouseover)
+    .on('mouseout', pointerleft)
     .call(responsivefy)
 
     const tooltip = d3.select('.tooltip')
@@ -91,7 +93,7 @@ function draw(){
         .attr("class", "group")
         .attr("transform", d => `translate(${xScale(d.name)}, 0)`)
         .selectAll("rect")
-        .data(d => Object.keys(d).slice(1).map(key => ({ key, value: d[key as keyof IGroupBar] })))        .enter()
+        .data(d => Object.keys(d).slice(1).map(key => ({ key, value: d[key as keyof IGroupBar] }))).enter()
         .append("rect")
         .attr("x", d => xScale.bandwidth() * (color.domain().indexOf(d.key) / color.domain().length))
         .attr("y", d => yScale(d.value as number))
@@ -100,6 +102,28 @@ function draw(){
         .attr("height", d => height - yScale(d.value as number))
         .attr("fill", d => color(d.key) as string)
 
+    function pointermouseover(e: MouseEvent) {
+        const [index] = d3.pointer(e)
+        const i = Math.round((index) / xScale.step()) - 1;
+
+        if(i >= 0 && i < data.length){
+            tooltip.style('display', 'block')
+                .data(data)
+                .style('left', `${e.pageX + 20}px`)
+                .style('top', `${e.pageY - 20}px`)
+                .style('color', '#212121')
+                .html(`${data[i].name}`)
+                .selectAll('div')
+                .data(d => Object.keys(d).slice(1).map(key => ({ key, value: d[key as keyof IGroupBar] }))).enter()
+                .append('div')
+                .style('color', '#212121')
+                .html(d => `${d.key}: <b class='tooltip-value'>${d.value}</b>`);
+        }
+    }
+
+    function pointerleft() {
+        tooltip.style('display', 'none');
+     }
 
     function responsivefy(svg: any) {
         const container = d3.select(svg.node().parentNode),

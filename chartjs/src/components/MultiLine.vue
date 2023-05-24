@@ -1,10 +1,13 @@
 <template>
   <canvas ref="multiChart"></canvas>
+    <div class="tooltip-custom">
+      <table></table>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { data, label } from '@/data/mutiline';
-import { Chart as ChartJS, registerables, type ChartTypeRegistry, type TooltipModel, type TooltipItem } from 'chart.js';
+import { Chart as ChartJS, registerables } from 'chart.js';
 import { ref, onMounted } from 'vue';
 
 ChartJS.register(...registerables);
@@ -52,22 +55,9 @@ function renderChart() {
   }
 }
 
-const getOrCreateTooltip = (chart:  ChartJS<keyof ChartTypeRegistry>) => {
-  let tooltipEl = chart.canvas.parentNode!.querySelector('div');
-  if (!tooltipEl) {
-    tooltipEl = document.createElement('div');
-    tooltipEl.classList.add('tooltip-custom');
-    const table = document.createElement('table');
-    table.style.margin = '0px';
-    tooltipEl.appendChild(table);
-    chart.canvas.parentNode!.appendChild(tooltipEl);
-  }
-  return tooltipEl;
-};
-
-const externalTooltipHandler = (context: any) => {
+function externalTooltipHandler(context: any){
   const {chart, tooltip} = context;
-  const tooltipEl = getOrCreateTooltip(chart);
+  const tooltipEl = chart.canvas.parentNode!.querySelector('div');
   // Hide if no tooltip
   if (tooltip.opacity === 0) {
     tooltipEl.style.opacity = '0';
@@ -77,7 +67,7 @@ const externalTooltipHandler = (context: any) => {
   // Set Text
   if (tooltip.body) {
     const titleLines = tooltip.title || [];
-    const bodyLines = tooltip.body.map((b: { lines: any; }) => b.lines);
+    const bodyLines = tooltip.body.map((b: any) => b.lines);
     const tableHead = document.createElement('thead');
 
     titleLines.forEach((title: any) => {
@@ -92,6 +82,8 @@ const externalTooltipHandler = (context: any) => {
 
     const tableBody = document.createElement('tbody');
     bodyLines.forEach((body: string, i: string | number) => {
+      const valueSplit = body[0].trim().split(':')
+      const value = `${valueSplit[0]}: <b style='font-weight: bold'>${valueSplit[1]}</b>`
       const colors = tooltip.labelColors[i];
       const span = document.createElement('span');
       span.style.background = colors.backgroundColor;
@@ -106,10 +98,9 @@ const externalTooltipHandler = (context: any) => {
       const tr = document.createElement('tr');
       tr.style.backgroundColor = 'inherit';
       const td = document.createElement('td');
-      const text = document.createTextNode(body);
 
       td.appendChild(span);
-      td.appendChild(text);
+      td.innerHTML += value;
       tr.appendChild(td);
       tableBody.appendChild(tr);
     });
@@ -127,10 +118,6 @@ const externalTooltipHandler = (context: any) => {
   }
 
   const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
-  console.log(tooltip.caretX, tooltip.caretY)
-  console.log(tooltip.x, tooltip.y)
-  console.log(tooltip, tooltip)
-
 
   // Display, position, and set styles for font
   tooltipEl.style.opacity = '1';
@@ -138,7 +125,7 @@ const externalTooltipHandler = (context: any) => {
   tooltipEl.style.top = positionY + tooltip.caretY + 'px';
   tooltipEl.style.font = tooltip.options.bodyFont.string;
   tooltipEl.style.padding = tooltip.options.padding + 'px ' + tooltip.options.padding + 'px';
-};
+}
 
 </script>
 <style>

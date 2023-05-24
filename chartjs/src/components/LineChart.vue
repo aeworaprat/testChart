@@ -65,7 +65,8 @@
           title: function (items: { label: string }[]) {
             return items[0].label;
           },
-          label: function (items: { formattedValue: any }) {
+          label: function (items: any) {
+            console.log(items)
             return `Total amount: ${items.formattedValue}`;
           },
         },

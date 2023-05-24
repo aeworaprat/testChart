@@ -25,7 +25,7 @@ const label2 = 'Value (%)'
 const data2: ILine[] = [
   { label: '01/01/2020', value: 10, other: [
     {label: 'Test1', value: 4,},
-    {label: 'Test2', value: 6,}
+    {label: 'Test2', value: 6,},
   ]},
   { label: '03/01/2020', value: 20, other: [] },
   { label: '06/01/2020', value: 15, other: [] },
