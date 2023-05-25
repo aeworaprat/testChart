@@ -31,8 +31,7 @@ function draw(){
     .on('mouseout', pointerleft)
     .call(responsivefy)
 
-    const tooltip = d3.select('.tooltip')
-        .style('display', 'none')
+    const tooltip = d3.select('.tooltip').style('display', 'none')
 
     const max = d3.max(data, d => {
     const values = Object.values(d).slice(1);
@@ -108,16 +107,16 @@ function draw(){
 
         if(i >= 0 && i < data.length){
             tooltip.style('display', 'block')
-                .data(data)
                 .style('left', `${e.pageX + 20}px`)
                 .style('top', `${e.pageY - 20}px`)
                 .style('color', '#212121')
-                .html(`${data[i].name}`)
+                .html(d => `${data[i].name}`)
                 .selectAll('div')
-                .data(d => Object.keys(d).slice(1).map(key => ({ key, value: d[key as keyof IGroupBar] }))).enter()
+                .data(Object.keys(data[i]).slice(1).map(key => ({ key, value: data[i][key as keyof IGroupBar] }))).enter()
                 .append('div')
                 .style('color', '#212121')
-                .html(d => `${d.key}: <b class='tooltip-value'>${d.value}</b>`);
+                .html(d => `<span style="background: ${color(d.key)}" class="tooltip-circle"></span>
+                ${d.key}: <b class='tooltip-value'>${d.value}</b>`);
         }
     }
 
@@ -156,5 +155,15 @@ function draw(){
         padding: 10px;
         box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
         border-radius: 8px;
+    }
+    .tooltip-value {
+        font-weight: 700;
+    }
+    .tooltip-circle{
+        margin-right: 10px; 
+        border-radius: 50%; 
+        height: 10px; 
+        width: 10px; 
+        display: inline-block
     }
 </style>

@@ -133,7 +133,7 @@ function externalTooltipHandler(context: any){
 <style>
 .tooltip-custom {
   opacity: 1; 
-  background-color: #FFFFFF;
+  background-color:rgba(255, 255, 255, 0.7);
   padding: 10px;
   box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
   border-radius: 8px;

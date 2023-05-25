@@ -8,13 +8,37 @@
 <script setup lang="ts">
 import * as d3 from 'd3';
 import { onMounted  } from 'vue';
-import { data, column, colors } from '@/data/stackBar'
+import { data1, type ITest } from '@/data/stackBar'
 import type { SeriesPoint } from 'd3';
 onMounted(() => {
     draw()
 })
 
+function buildData(d: ITest[]){
+    const colors = d[0].data.map(x => x.color)
+    const column = d[0].data.map(x => x.label)
+    const obj :{ [key: string]: number} = {}
+    const data: any[] = []
+    d.forEach((d) => {
+        d.data.forEach((item) => {
+            obj [item.label] = item.value
+        })
+        data.push({
+            name: d.name,
+            ...obj
+        })
+    })
+
+    return {
+        data,
+        column,
+        colors
+    }
+}
+
 function draw(){
+    const { colors, data, column } = buildData(data1)
+
     const svg = d3.select("svg");
     svg.selectAll("*").remove();
 
@@ -25,10 +49,10 @@ function draw(){
     svg.attr("width", width)
     .attr("height", height)
     .attr("font-size", 10)
+    .attr("preserveAspectRatio", "xMinYMin meet")
     .style("overflow", "visible")
-    .call(responsivefy); // tada!;
 
-    const tooltip = d3.select('.tooltip');
+    const tooltip = d3.select('.tooltip').style('display','none');
     // list of value keys
 
    const max = d3.max(data, d => {
@@ -109,7 +133,8 @@ function draw(){
 
         Object.keys(d.data).forEach((key: string) => {
             if (key !== "name" && key !== "key") {
-            tooltipText += `${key}: <b class='tooltip-value'>${d.data[key]}<b><br/>`;
+            tooltipText += `<span style="background: ${color(key)}" class="tooltip-circle"></span>
+                ${key}: <b class='tooltip-value'>${d.data[key]}<b><br/>`;
             }
         });
 
@@ -120,7 +145,7 @@ function draw(){
             .html(`${tooltipText}`)
     }
 
-    function pointerleft(e: MouseEvent){
+    function pointerleft(){
         tooltip.style('display', 'none')
     }
 
@@ -155,6 +180,16 @@ function draw(){
         padding: 10px;
         box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
         border-radius: 8px;
+    }
+    .tooltip-value {
+        font-weight: 700;
+    }
+    .tooltip-circle{
+        margin-right: 10px; 
+        border-radius: 50%; 
+        height: 10px; 
+        width: 10px; 
+        display: inline-block
     }
 
 </style>

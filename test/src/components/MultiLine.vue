@@ -54,8 +54,8 @@ function draw(){
         .on('mouseout', pointerleft)
         .call(responsivefy);
 
-    const tooltip = d3.select('.tooltip');
-    const tooltipLine = svg.append('line');
+    const tooltip = d3.select('.tooltip').style('display', 'none')
+    const tooltipLine = svg.append('line').style('display', 'none')
 
     //get max value 
     const max = d3.max(data.value, d => d3.max(d.other, h => h.value))!
@@ -138,9 +138,14 @@ function draw(){
                 .data(data.value).enter()
                 .append('div')
                 .style('color', '#212121')
-                .html(d => `${d.name}: <b class='tooltip-value'>${d.other.find(h => h.label === label.value[i])!.value}</b>`);
+                .html(d => 
+                    `<span 
+                        style="background: ${d.color}"
+                        class="tooltip-circle">
+                    </span> 
+                    ${d.name}: <b class='tooltip-value'>${d.other.find(h => h.label === label.value[i])!.value}</b>`);
 
-            tooltipLine.attr('display', 'block')
+            tooltipLine.style('display', 'block')
                 .attr('x1', xScale(label.value[i])!)
                 .attr('x2', xScale(label.value[i])!)
                 .attr('y1', 0)
@@ -170,6 +175,7 @@ function draw(){
         tooltip.style('display', 'none');
         tooltipCircle.style("display", "none");
         tooltipCircleOuter.style("display", "none");
+        tooltipLine.style('display', 'block')
      }
 
      function responsivefy(svg: any) {
@@ -207,6 +213,13 @@ function draw(){
     }
     .tooltip-value {
         font-weight: 700;
+    }
+    .tooltip-circle{
+        margin-right: 10px; 
+        border-radius: 50%; 
+        height: 10px; 
+        width: 10px; 
+        display: inline-block
     }
 
 </style>

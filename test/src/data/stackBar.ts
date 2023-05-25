@@ -7,12 +7,133 @@ interface IStackBar {
     won: number
     lost: number
 };
+export interface ITest {
+    name: string
+    data: {
+        label: string
+        value: number
+        color: string
+    }[]
+};
 
 export const column: string[] = ['new', 'follow','quote','decision', 'won', 'lost']
 
 export const colors: string[] = ['#4410D5','#12A5F8','#F2A244','#FF7182','#978EFB','#5A6A76']
 
-export const data: IStackBar[] = [
+export const data1: ITest[] = [
+    {
+        name: 'นาย 1',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 2',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 3',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 4',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 5',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 6',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 7',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 8',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 9',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+    {
+        name: 'นาย 10',
+        data: [
+            { label: 'New', value: 26, color: '#4410D5'},
+            { label: 'Follow', value: 26, color: '#12A5F8'},
+            { label: 'Quote', value: 26, color: '#F2A244'},
+            { label: 'Decision', value: 26, color: '#FF7182'},
+            { label: 'Won', value: 26, color: '#978EFB'},
+            { label: 'Lost', value: 26, color: '#5A6A76'},
+        ],
+    },
+]
+
+export const data2: IStackBar[] = [
     {
         name: 'นาย 1',
         new: 26,
