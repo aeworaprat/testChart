@@ -1,15 +1,48 @@
 <template>
-   <div>
-        <svg></svg>
-        <div class="tooltip"></div>
-    </div>
+	<svg></svg>
+	<div 
+		v-show="tooltipConfig.show" 
+		:style="{ top: `${tooltipConfig.top}px`, left: `${tooltipConfig.left}px`}" 
+		class="tooltip"
+	>
+    <slot name="tooltip" :tooltipBody="tooltipBody">
+      <div>{{ tooltipBody.name }}</div>
+      <div v-for="(d ,index) in tooltipBody.data" :key="index">
+          <div>
+            <label :style="{ background: d.color} " class="tooltip-circle"></label>  
+            {{ d.label }}:
+            <b style="font-weight: bold;">{{ d.value }}</b>
+          </div>
+      </div>
+  </slot>
+	</div>
 </template>
 
 <script setup lang="ts">
 import * as d3 from 'd3';
-import { onMounted  } from 'vue';
+import { onMounted, ref  } from 'vue';
 import { data1, type ITest } from '@/data/stackBar'
 import type { SeriesPoint } from 'd3';
+
+interface ITooltipBody {
+    name: string
+	data: {
+		label: string
+		value: number
+		color: string
+	}[]
+}
+const tooltipConfig = ref({
+  show: false,
+  left: 0,
+  top: 0,
+}) 
+const tooltipBody = ref<ITooltipBody>({
+  data: [],
+  name: ''
+})
+
+
 onMounted(() => {
     draw()
 })
@@ -80,15 +113,13 @@ function draw(){
         .tickPadding(6)
 
     // Add x-axis
-    svg.append('g')
-        .attr("transform", `translate(0,${height})`)
-        .call(xAxis);
+
 
     // Add y-axis
      svg.append('g')
         .call(yAxis)
         .call(g => g.selectAll(".tick line")
-            .attr("stroke", "#A0ABBA").clone()
+            .attr("stroke", "#A0ABBA")
             .attr("x2", width)
             .attr("stroke-opacity",   0.3))
         .call(g => g.select(".domain").remove())
@@ -129,24 +160,29 @@ function draw(){
         .on('mouseout', pointerleft)
 
     function pointermouseover(e: MouseEvent, d: SeriesPoint<any>) {
-        let tooltipText = `${d.data.name}<br/>`;
+        tooltipBody.value.data = []
+        tooltipBody.value.name = ''
 
+        tooltipBody.value.name = d.data.name,
         Object.keys(d.data).forEach((key: string) => {
-            if (key !== "name" && key !== "key") {
-            tooltipText += `<span style="background: ${color(key)}" class="tooltip-circle"></span>
-                ${key}: <b class='tooltip-value'>${d.data[key]}<b><br/>`;
+            if (key !== "name") {
+                tooltipBody.value.data.push(
+                    {
+                        label: key,
+                        color: color(key) as any,
+                        value: d.data[key]
+                    }
+                )
             }
         });
 
-        tooltip.style('display', 'block')
-            .style('left', `${e.pageX + 20}px`)
-            .style('top', `${e.pageY - 20}px`)
-            .style('color', '#212121')
-            .html(`${tooltipText}`)
+        tooltipConfig.value.show = true
+        tooltipConfig.value.left = e.pageX + 20
+        tooltipConfig.value.top = e.pageY - 20
     }
 
     function pointerleft(){
-        tooltip.style('display', 'none')
+        tooltipConfig.value.show = false
     }
 
     function responsivefy(svg: any) {
@@ -171,6 +207,10 @@ function draw(){
             svg.attr('height', Math.round(w / aspect));
         }
     }
+
+    svg.append('g')
+        .attr("transform", `translate(0,${height})`)
+        .call(xAxis);
 }
 </script>
 <style>
@@ -180,6 +220,7 @@ function draw(){
         padding: 10px;
         box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
         border-radius: 8px;
+        color: #212121
     }
     .tooltip-value {
         font-weight: 700;
@@ -191,5 +232,11 @@ function draw(){
         width: 10px; 
         display: inline-block
     }
-
+    .test1 {
+  
+        display: none  !important;
+    }
+    .test2 {
+        display: block  !important;
+    }
 </style>

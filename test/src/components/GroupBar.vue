@@ -1,15 +1,47 @@
 <template>
-    <div>
-        <svg></svg>
-        <div class="tooltip"></div>
-    </div>
+	<svg></svg>
+	<div 
+		v-show="tooltipConfig.show" 
+		:style="{ top: `${tooltipConfig.top}px`, left: `${tooltipConfig.left}px`}" 
+		class="tooltip"
+	>
+    <slot name="tooltip" :tooltipBody="tooltipBody">
+      <div>{{ tooltipBody.name }}</div>
+      <div v-for="(d ,index) in tooltipBody.data" :key="index">
+          <div>
+            <label :style="{ background: d.color} " class="tooltip-circle"></label>  
+            {{ d.label }}:
+            <b style="font-weight: bold;">{{ d.value }}</b>
+          </div>
+      </div>
+  </slot>
+	</div>
 </template>
 
 <script setup lang="ts">
 import * as d3 from 'd3';
-import { onMounted  } from 'vue';
+import { onMounted, ref  } from 'vue';
 import { data, column, colors } from '@/data/groupBar'
 import type { IGroupBar } from '@/data/groupBar'
+
+interface ITooltipBody {
+    name: string
+	data: {
+		label: string
+		value: number
+		color: string
+	}[]
+}
+
+const tooltipConfig = ref({
+  show: false,
+  left: 0,
+  top: 0,
+}) 
+const tooltipBody = ref<ITooltipBody>({
+  data: [],
+  name: ''
+})
 
 onMounted(() => {
     draw()
@@ -21,7 +53,7 @@ function draw(){
 
     const width = 800;
     const height = 400;
-    const margin = { top: 40, right: 40, bottom: 30, left: 40 };
+    // const margin = { top: 40, right: 40, bottom: 30, left: 40 };
 
     svg.attr("width", width)
     .attr("height", height)
@@ -30,8 +62,6 @@ function draw(){
     .on('mousemove', pointermouseover)
     .on('mouseout', pointerleft)
     .call(responsivefy)
-
-    const tooltip = d3.select('.tooltip').style('display', 'none')
 
     const max = d3.max(data, d => {
     const values = Object.values(d).slice(1);
@@ -64,7 +94,7 @@ function draw(){
     svg.append('g')
         .call(yAxis)
         .call(g => g.selectAll(".tick line")
-            .attr("stroke", "#A0ABBA").clone()
+            .attr("stroke", "#A0ABBA")
             .attr("x2", width)
             .attr("stroke-opacity",   0.3))
         .call(g => g.select(".domain").remove())
@@ -104,24 +134,31 @@ function draw(){
     function pointermouseover(e: MouseEvent) {
         const [index] = d3.pointer(e)
         const i = Math.round((index) / xScale.step()) - 1;
-
         if(i >= 0 && i < data.length){
-            tooltip.style('display', 'block')
-                .style('left', `${e.pageX + 20}px`)
-                .style('top', `${e.pageY - 20}px`)
-                .style('color', '#212121')
-                .html(d => `${data[i].name}`)
-                .selectAll('div')
-                .data(Object.keys(data[i]).slice(1).map(key => ({ key, value: data[i][key as keyof IGroupBar] }))).enter()
-                .append('div')
-                .style('color', '#212121')
-                .html(d => `<span style="background: ${color(d.key)}" class="tooltip-circle"></span>
-                ${d.key}: <b class='tooltip-value'>${d.value}</b>`);
+            tooltipBody.value.name = ''
+            tooltipBody.value.data = []
+            tooltipBody.value.name = data[i].name
+
+            Object.keys(data[i]).map(key => ({ key, value: data[i][key as keyof IGroupBar] })).forEach((x) => {
+                if (x.key !== "name") {
+                    tooltipBody.value.data.push(
+                        {
+                            label: x.key,
+                            color: color(x.key) as any,
+                            value: +x.value
+                        }
+                    )
+                }
+            })
+                  
+            tooltipConfig.value.show = true
+            tooltipConfig.value.left = e.pageX + 20
+            tooltipConfig.value.top = e.pageY - 20
         }
     }
 
     function pointerleft() {
-        tooltip.style('display', 'none');
+        tooltipConfig.value.show = false
      }
 
     function responsivefy(svg: any) {
@@ -155,6 +192,7 @@ function draw(){
         padding: 10px;
         box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
         border-radius: 8px;
+        color: #212121
     }
     .tooltip-value {
         font-weight: 700;

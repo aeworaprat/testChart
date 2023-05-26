@@ -1,13 +1,36 @@
 <template>
-    <div>
-        <svg></svg>
-        <div class="tooltip"></div>
-    </div>
+	<svg></svg>
+	<div 
+		v-show="tooltipConfig.show" 
+		:style="{ top: `${tooltipConfig.top}px`, left: `${tooltipConfig.left}px`}" 
+		class="tooltip"
+	>
+    <slot name="tooltip" :tooltipBody="tooltipBody">
+      <div>{{ tooltipBody.name }}</div>
+      <div v-for="(d ,index) in tooltipBody.data" :key="index">
+          <div>
+            <label :style="{ background: d.color} " class="tooltip-circle"></label>  
+            {{ d.label }}:
+            <b style="font-weight: bold;">{{ d.value }}</b>
+          </div>
+      </div>
+  </slot>
+	</div>
 </template>
+
 <script setup lang="ts">
 import * as d3 from "d3";
 import { onMounted, ref, watch } from 'vue'
 import type { IMultiLine } from "@/data/multiLine";
+
+interface ITooltipBody {
+    name: string
+	data: {
+		label: string
+		value: number
+		color: string
+	}[]
+}
 
 const props = withDefaults(defineProps<{
   data: IMultiLine[]
@@ -22,6 +45,16 @@ const props = withDefaults(defineProps<{
 const title = ref(props.title)
 const data = ref(props.data)
 const label = ref(props.label)
+
+const tooltipConfig = ref({
+  show: false,
+  left: 0,
+  top: 0,
+}) 
+const tooltipBody = ref<ITooltipBody>({
+  data: [],
+  name: ''
+})
 
 watch([
     () => props.data, 
@@ -44,7 +77,7 @@ function draw(){
 
     const width = 800;
     const height = 400;
-    const margin = {top: 40, right: 40, bottom: 30, left: 40};
+    const margin = {right: 40, left: 40};
 
     svg.attr("width", width)
         .attr("height", height)
@@ -57,10 +90,9 @@ function draw(){
     const tooltip = d3.select('.tooltip').style('display', 'none')
     const tooltipLine = svg.append('line').style('display', 'none')
 
-    //get max value 
     const max = d3.max(data.value, d => d3.max(d.other, h => h.value))!
     const maxValue = max + (10 - max % 10)
-    // Define the scales and tell D3 how to draw the line
+
     const xScale = d3.scalePoint()
         .domain(label.value)
         .range([margin.left, width - margin.right])
@@ -90,7 +122,7 @@ function draw(){
     svg.append('g')
         .call(yAxis)
         .call(g => g.selectAll(".tick line")
-            .attr("stroke", "#A0ABBA").clone()
+            .attr("stroke", "#A0ABBA")
             .attr("x2", width)
             .attr("stroke-opacity",   0.3))
         .call(g => g.select(".domain").remove())
@@ -124,26 +156,26 @@ function draw(){
         .append('circle')
         .attr('class', 'circle')
 
-    function pointermoved(event: MouseEvent) {
-        const [index] = d3.pointer(event)
-        const i = Math.round((index - margin.left) / xScale.step());
+    function pointermoved(e: MouseEvent) {
+        const [index] = d3.pointer(e)
+        const i = Math.round((index - margin.left) / xScale.step())
         if(i >= 0 && i < label.value.length){
-            const xTitle = label.value[i]
-            tooltip.style('display', 'block')
-                .style('left', `${event.pageX + 20}px`)
-                .style('top', `${event.pageY - 20}px`)
-                .style('color', '#212121')
-                .html(`${xTitle}`)
-                .selectAll('div')
-                .data(data.value).enter()
-                .append('div')
-                .style('color', '#212121')
-                .html(d => 
-                    `<span 
-                        style="background: ${d.color}"
-                        class="tooltip-circle">
-                    </span> 
-                    ${d.name}: <b class='tooltip-value'>${d.other.find(h => h.label === label.value[i])!.value}</b>`);
+            tooltipBody.value.data = []
+            tooltipBody.value.name = data.value[0].other[i].label
+
+            data.value.map(x => {
+                tooltipBody.value.data.push(
+                    {
+                        label: x.name,
+                        value: x.other[i].value,
+                        color: x.color
+                    }
+                );
+            })
+
+            tooltipConfig.value.show = true
+            tooltipConfig.value.left = e.pageX + 20
+            tooltipConfig.value.top = e.pageY - 20
 
             tooltipLine.style('display', 'block')
                 .attr('x1', xScale(label.value[i])!)
@@ -172,7 +204,7 @@ function draw(){
     }
 
     function pointerleft() {
-        tooltip.style('display', 'none');
+        tooltipConfig.value.show = false
         tooltipCircle.style("display", "none");
         tooltipCircleOuter.style("display", "none");
         tooltipLine.style('display', 'block')
@@ -210,6 +242,7 @@ function draw(){
         padding: 10px;
         box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
         border-radius: 8px;
+        color: #212121
     }
     .tooltip-value {
         font-weight: 700;

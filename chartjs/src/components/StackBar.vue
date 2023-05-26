@@ -1,7 +1,16 @@
 <template>
   <canvas ref="stackChart"></canvas>
-  <div class="tooltip-custom">
-    <table></table>
+  <div v-show="tooltipConfig.show" :style="{ top: `${tooltipConfig.top}px`, left: `${tooltipConfig.left}px`}" class="tooltip">
+    <slot name="tooltip" :tooltipBody="tooltipBody">
+      <div>{{ tooltipBody.name }}</div>
+      <div v-for="(d ,index) in tooltipBody.data" :key="index">
+          <div>
+            <label :style="{ background: d.color} " class="tooltip-circle"></label>  
+            {{ d.label }}:
+            <b style="font-weight: bold;">{{ d.value }}</b>
+          </div>
+      </div>
+  </slot>
   </div>
 </template>
    
@@ -10,6 +19,25 @@ import { Chart as ChartJS, registerables } from 'chart.js';
 import { ref, onMounted } from 'vue';
 import { data, label } from '@/data/stackbar'
    
+interface ITooltipBody {
+    name : string
+    data: {
+      label: string
+      value: number
+      color: string
+    }[]
+}
+
+const tooltipConfig = ref({
+  show: false,
+  left: 0,
+  top: 0,
+}) 
+const tooltipBody = ref<ITooltipBody>({
+  data: [],
+  name: ''
+})
+
 ChartJS.register(...registerables);
 const stackChart = ref<HTMLCanvasElement | null>(null);
 
@@ -59,88 +87,48 @@ function renderChart(){
 
 function externalTooltipHandler(context: any){
   const {chart, tooltip} = context;
-  const tooltipEl = chart.canvas.parentNode!.querySelector('div');
-  // Hide if no tooltip
-  if (tooltip.opacity === 0) {
-    tooltipEl.style.opacity = '0';
-    return;
-  }
 
   // Set Text
   if (tooltip.body) {
-    const titleLines = tooltip.title || [];
     const bodyLines = tooltip.body.map((b: any) => b.lines);
-    const tableHead = document.createElement('thead');
+    tooltipBody.value.name = ''
+    tooltipBody.value.data = []
 
-    titleLines.forEach((title: any) => {
-      const tr = document.createElement('tr');
-      const th = document.createElement('th');
-      th.style.fontWeight = 'bold';
-      const text = document.createTextNode(title);
-      th.appendChild(text);
-      tr.appendChild(th);
-      tableHead.appendChild(tr);
-    });
-
-    const tableBody = document.createElement('tbody');
+    tooltipBody.value.name = tooltip.title[0] || '';
     bodyLines.forEach((body: string, i: string | number) => {
       const valueSplit = body[0].trim().split(':')
-      const value = `${valueSplit[0]}: <b style='font-weight: bold'>${valueSplit[1]}</b>`
       const colors = tooltip.labelColors[i];
-      const span = document.createElement('span');
-      span.style.background = colors.backgroundColor;
-      span.style.borderColor = colors.borderColor;
-      span.style.borderWidth = '2px';
-      span.style.marginRight = '10px';
-      span.style.borderRadius = '50%';
-      span.style.height = '10px';
-      span.style.width = '10px';
-      span.style.display = 'inline-block';
-
-      const tr = document.createElement('tr');
-      tr.style.backgroundColor = 'inherit';
-      const td = document.createElement('td');
-
-      td.appendChild(span);
-      td.innerHTML += value;
-      tr.appendChild(td);
-      tableBody.appendChild(tr);
+      tooltipBody.value.data.push({
+        color: colors.backgroundColor,
+        label: valueSplit[0],
+        value: +valueSplit[1],
+      })
     });
-
-    const tableRoot = tooltipEl.querySelector('table');
-
-    // Remove old children
-    while (tableRoot!.firstChild) {
-      tableRoot!.firstChild.remove();
-    }
-
-    // Add new children
-    tableRoot!.appendChild(tableHead);
-    tableRoot!.appendChild(tableBody);
   }
 
+  tooltip.opacity === 0 ? tooltipConfig.value.show = false : tooltipConfig.value.show = true 
   const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
+  tooltipConfig.value.left = positionX + tooltip.caretX
+  tooltipConfig.value.top = positionY + tooltip.caretY
 
-  // Display, position, and set styles for font
-  tooltipEl.style.opacity = '1';
-  tooltipEl.style.left = positionX + tooltip.caretX + 'px';
-  tooltipEl.style.top = positionY + tooltip.caretY + 'px';
-  tooltipEl.style.font = tooltip.options.bodyFont.string;
-  tooltipEl.style.padding = tooltip.options.padding + 'px ' + tooltip.options.padding + 'px';
 }
 
 </script>
 <style>
-.tooltip-custom {
+.tooltip {
   opacity: 1; 
-  background-color:rgba(255, 255, 255, 0.7);
+  position: absolute; 
+  background-color:#FFFFFF;
   padding: 10px;
   box-shadow: 1px 1px 12px rgba(39, 46, 57, 0.16);
   border-radius: 8px;
-  pointer-events: none;
-  position: absolute;
-  transform: translate(-50%, 0);
-  transition: 'all .1s ease'
+}
+.tooltip-circle{
+  margin-right: 10px; 
+  border-radius: 50%; 
+  height: 10px; 
+  width: 10px; 
+  display: inline-block
 }
 </style>
    
